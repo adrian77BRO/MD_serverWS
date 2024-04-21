@@ -2,7 +2,6 @@ import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import cors from 'cors';
-//const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(cors());
@@ -12,13 +11,11 @@ const io = new SocketIOServer(server, {
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
-    },
-    pingInterval: 1000,
-    pingTimeout: 2000,
+    }
 });
 
 io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+    console.log('User connected');
 
     socket.on('sendData', (data: any) => {
         console.log('Informacion Recibida:', data);
@@ -26,7 +23,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
+        console.log('User disconnected');
     });
 });
 
