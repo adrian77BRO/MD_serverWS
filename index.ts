@@ -2,6 +2,8 @@ import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import cors from 'cors';
+import { verifyToken } from './src/middlewares/authMiddleware';
+import { dataHandler } from './src/handlers/dataHandler';
 
 const app = express();
 app.use(cors());
@@ -14,17 +16,24 @@ const io = new SocketIOServer(server, {
     }
 });
 
-io.on('connection', (socket) => {
-    console.log('User connected');
+io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    verifyToken(socket, token, next);
+});
 
-    socket.on('sendData', (data: any) => {
-        console.log('Informacion Recibida:', data);
-        io.emit('getData', data);
-    });
+io.on('connection', (socket) => {
+    console.log('User connected: ', socket.data.idUser);
+    socket.join(socket.data.idUser);
+    dataHandler(io, socket);
 
     socket.on('disconnect', () => {
-        console.log('User disconnected');
+        console.log('User disconnected: ');
     });
+
+    socket.on('reconnect', () => {
+        console.log('User reconnected');
+      });
+    
 });
 
 server.listen(8080, () => {
